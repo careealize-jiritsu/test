@@ -1,0 +1,63 @@
+name: X 自動投稿
+
+on:
+  schedule:
+    # 毎日 19:00 JST（= 10:00 UTC）。GitHub の混雑で数分〜数十分遅れることがある
+    - cron: "0 10 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "投稿せずに内容だけ確認する"
+        type: boolean
+        default: true
+      slug:
+        description: "投稿するトピック（空ならキューの次）"
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: post-to-x
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    env:
+      X_API_KEY: ${{ secrets.X_API_KEY }}
+      X_API_SECRET: ${{ secrets.X_API_SECRET }}
+      X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+      X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r scripts/requirements.txt
+
+      - name: 投稿
+        id: post
+        run: |
+          args=()
+          if [ -n "${{ inputs.slug }}" ]; then args+=(--slug "${{ inputs.slug }}"); fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            python scripts/post_to_x.py --dry-run "${args[@]}"
+          elif [ -z "$X_API_KEY" ]; then
+            echo "::warning::X の API キー（Secrets）が未設定のため投稿をスキップしました"
+          else
+            python scripts/post_to_x.py "${args[@]}"
+          fi
+
+      - name: 投稿記録をコミット
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add posts/posted.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m "Record X posts"
+            git push
+          fi
