@@ -2,6 +2,23 @@
 
 最終更新：2026-10-12
 
+## 現在の状態（2026-10-12 時点）
+
+**一時停止中**：GitHub Actions の「X 自動投稿」ワークフローを手動で無効化している（毎日 19:00 の自動実行は止まっている）。
+
+- 済：X のアプリ権限を読み書きに変更、API キー 4 つを GitHub Secrets に登録
+- 済：`claude/festive-babbage-qgq9zt` から `main` を作成し、既定ブランチを `main` に変更（下の作業 3 はこれで完了。PR は作っていない）
+- 済：dry_run テスト成功（早期内定ロードマップ。2 投稿分の文面と画像を確認）
+- 未：X のクレジット購入（残高 $0。このままでは投稿できない）
+- 未：dry_run を外した実投稿テスト、欠けている画像の追加（作業 5）
+
+### 再開手順
+
+1. X Developer Console →「クレジット」でクレジットを購入する（支出上限も設定する）
+2. GitHub → Actions →「X 自動投稿」→ **Enable workflow**
+3. Run workflow で dry_run のチェックを外して 1 回実行し、実際に投稿されるか確認する
+4. 以後は毎日 19:00 JST に自動投稿される
+
 ## 目的
 
 Google ドライブの就活 Tips のカルーセル画像（1500×1500、1 トピック 8 枚）を、X に毎日自動投稿する。
@@ -9,7 +26,7 @@ TikTok は審査と自社ドメインでの画像配信が必要なので後回�
 
 ## できていること
 
-- リポジトリ `careealize-jiritsu/test` のブランチ `claude/festive-babbage-qgq9zt` にすべてプッシュ済み（main には未取り込み）
+- リポジトリ `careealize-jiritsu/test` のブランチ `claude/festive-babbage-qgq9zt` にすべてプッシュ済み。2026-10-12 にこのブランチから main を作成し、既定ブランチにした
 - `scripts/post_to_x.py`：投稿スクリプト。X API v2 を OAuth 1.0a で使う
   - 画像アップロードは `POST https://api.x.com/2/media/upload`、投稿は `POST https://api.x.com/2/tweets`
   - 1 トピックを 2 投稿のスレッドにする（`x_thread[i]` に画像 `slides[4i:4i+4]` を付ける）
