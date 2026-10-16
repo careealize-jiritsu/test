@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Notion"
+    ],
+    "ask": [
+      "mcp__Notion__notion-delete-pages",
+      "mcp__Notion__notion-delete-databases"
+    ]
+  }
+}
